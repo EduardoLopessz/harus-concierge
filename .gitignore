@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+data/
+*.log
+scrape_log.txt
+.pytest_cache/
+
+# Config local do Claude Code / infra pessoal — não faz parte do produto
+.claude/
+
+# Certificado da rede corporativa onde o projeto foi desenvolvido (inspeção
+# SSL da empresa) — específico dessa máquina/rede, não é necessário pra
+# rodar em qualquer outro ambiente. Ver nota no README/Dockerfile: quem for
+# rodar atrás de um proxy com inspeção SSL semelhante deve gerar o próprio.
+corporate-ca.crt
+
+# Logo real da Harus (baixado do site oficial) — usado localmente pelo
+# /teste, mas fora do repo público por ser identidade visual de terceiro
+static/logo-harus.png

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concierge Harus — projeto de portfólio (RAG chat sobre um catálogo institucional)</title>
+<meta name="description" content="Um assistente de IA que lê o catálogo institucional de uma indústria de amenities hoteleiras, indexa cada item com embeddings e responde por ele. Projeto independente de portfólio de Eduardo Elias Lopes.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><rect width=%2224%22 height=%2224%22 rx=%225%22 fill=%22%23162330%22/><path d=%22M8 7h8v3a4 4 0 0 1-4 4 4 4 0 0 1-4-4V7Z%22 stroke=%22%23B89A57%22 stroke-width=%221.4%22 fill=%22none%22/><path d=%22M12 14v4M9 18h6%22 stroke=%22%23B89A57%22 stroke-width=%221.4%22/></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,600&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ícones originais (line-art de embalagens de amenities) reutilizados no padrão do hero e nos estágios do pipeline -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="ico-bottle-pump" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="20" y="22" width="16" height="30" rx="4"/>
+      <rect x="25" y="14" width="6" height="8" rx="1"/>
+      <path d="M31 14 42 10M42 10v6h-4"/>
+    </symbol>
+    <symbol id="ico-jar" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="16" y="24" width="32" height="26" rx="5"/>
+      <rect x="18" y="16" width="28" height="9" rx="3"/>
+    </symbol>
+    <symbol id="ico-tube" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M26 14h12l3 6-5 30a3 3 0 0 1-3 2.5h-2A3 3 0 0 1 28 50l-5-30 3-6Z"/>
+      <path d="M25 20h14"/>
+    </symbol>
+    <symbol id="ico-dropper" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="24" y="24" width="16" height="28" rx="4"/>
+      <path d="M28 24v-8a4 4 0 0 1 8 0v8"/>
+      <circle cx="32" cy="12" r="3"/>
+    </symbol>
+    <symbol id="ico-diamond" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 24 32 16l10 8-4 26H26l-4-26Z"/>
+      <path d="M25 22h14M32 16v6"/>
+    </symbol>
+    <symbol id="ico-soap" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="14" y="26" width="36" height="18" rx="9"/>
+    </symbol>
+  </defs>
+</svg>
+
+<nav class="nav">
+  <div class="container">
+    <span class="nav-word">Concierge <em>Harus</em></span>
+    <ul class="nav-links">
+      <li><a href="#pipeline">Como funciona</a></li>
+      <li><a href="#previa">Prévia</a></li>
+      <li><a href="#stack">Stack</a></li>
+      <li><a class="repo-link" href="https://github.com/EduardoLopessz/harus-concierge" target="_blank" rel="noopener noreferrer">Código ↗</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-pattern" aria-hidden="true">
+    <svg style="--r:-4deg"><use href="#ico-bottle-pump"/></svg>
+    <svg style="--r:6deg"><use href="#ico-jar"/></svg>
+    <svg style="--r:-8deg"><use href="#ico-tube"/></svg>
+    <svg style="--r:3deg"><use href="#ico-dropper"/></svg>
+    <svg style="--r:-5deg"><use href="#ico-diamond"/></svg>
+    <svg style="--r:7deg"><use href="#ico-soap"/></svg>
+    <svg style="--r:4deg"><use href="#ico-jar"/></svg>
+    <svg style="--r:-3deg"><use href="#ico-bottle-pump"/></svg>
+    <svg style="--r:8deg"><use href="#ico-dropper"/></svg>
+    <svg style="--r:-6deg"><use href="#ico-diamond"/></svg>
+    <svg style="--r:5deg"><use href="#ico-tube"/></svg>
+    <svg style="--r:-2deg"><use href="#ico-soap"/></svg>
+    <svg style="--r:2deg"><use href="#ico-jar"/></svg>
+    <svg style="--r:-7deg"><use href="#ico-bottle-pump"/></svg>
+    <svg style="--r:6deg"><use href="#ico-diamond"/></svg>
+    <svg style="--r:-4deg"><use href="#ico-dropper"/></svg>
+    <svg style="--r:3deg"><use href="#ico-tube"/></svg>
+    <svg style="--r:-8deg"><use href="#ico-soap"/></svg>
+    <svg style="--r:5deg"><use href="#ico-jar"/></svg>
+    <svg style="--r:-1deg"><use href="#ico-bottle-pump"/></svg>
+  </div>
+
+  <div class="container hero-inner">
+    <div>
+      <span class="hero-eyebrow-box">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="eyebrow on-dark">Projeto independente de portfólio — não é um produto oficial da Harus</span>
+      </span>
+      <h1>Um concierge para um catálogo que <em>não tinha busca</em>.</h1>
+      <p class="lede">
+        O site institucional de uma indústria de amenities hoteleiras organiza 30 anos
+        de linhas de produto em dezenas de páginas — mas nenhuma busca. Este projeto lê
+        o catálogo inteiro, indexa cada item com embeddings e devolve uma interface de
+        chat que responde por ele.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-gold" href="#previa">Ver a prévia</a>
+        <a class="btn btn-ghost" href="https://github.com/EduardoLopessz/harus-concierge" target="_blank" rel="noopener noreferrer">Código no GitHub ↗</a>
+      </div>
+    </div>
+    <div class="hero-figure" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 24 32 16l10 8-4 26H26l-4-26Z"/>
+        <path d="M25 22h14M32 16v6"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<section class="disclaimer-banner">
+  <div class="container">
+    ⚠️ <strong>Este site não é operado pela Harus</strong> — é um projeto autoral de
+    Eduardo Elias Lopes, construído sobre a estrutura pública do catálogo institucional
+    da empresa, sem uso de fotos de produto ou identidade visual da marca.
+  </div>
+</section>
+
+<section class="band band-light" id="pipeline">
+  <div class="container">
+    <div class="band-head">
+      <span class="eyebrow on-light">Da página ao chat</span>
+      <h2>Como o catálogo vira conversa</h2>
+    </div>
+
+    <div class="belt">
+      <div class="stage">
+        <span class="stage-num">01</span>
+        <svg class="stage-icon"><use href="#ico-bottle-pump"/></svg>
+        <h3>Coleta</h3>
+        <p>Lê o HTML de cada página de coleção direto — sem navegador, sem Playwright.</p>
+      </div>
+      <div class="stage">
+        <span class="stage-num">02</span>
+        <svg class="stage-icon"><use href="#ico-diamond"/></svg>
+        <h3>Chave única</h3>
+        <p>Cada item ganha uma chave página + id — várias coleções reusam ids genéricos, e isso colidia dados até ser corrigido.</p>
+      </div>
+      <div class="stage">
+        <span class="stage-num">03</span>
+        <svg class="stage-icon"><use href="#ico-dropper"/></svg>
+        <h3>Embeddings</h3>
+        <p>Cada item vira um vetor de 768 dimensões, gerado via Gemini.</p>
+      </div>
+      <div class="stage">
+        <span class="stage-num">04</span>
+        <svg class="stage-icon"><use href="#ico-jar"/></svg>
+        <h3>Índice</h3>
+        <p>Os vetores entram numa coleção Qdrant única, com controle de mudança por hash.</p>
+      </div>
+      <div class="stage">
+        <span class="stage-num">05</span>
+        <svg class="stage-icon"><use href="#ico-tube"/></svg>
+        <h3>Raciocínio</h3>
+        <p>Um workflow N8N busca o contexto certo, monta o prompt e chama o Gemini.</p>
+      </div>
+      <div class="stage">
+        <span class="stage-num">06</span>
+        <svg class="stage-icon"><use href="#ico-soap"/></svg>
+        <h3>Conversa</h3>
+        <p>Um widget embutível entra em qualquer página do site, sem exigir login.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band band-dark" id="previa">
+  <div class="container">
+    <div class="band-head">
+      <span class="eyebrow on-dark">Prévia visual · respostas simuladas</span>
+      <h2>Fale com o concierge</h2>
+    </div>
+
+    <div class="preview-frame">
+      <div class="preview-chrome">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="url">catalogo-institucional/produtos</span>
+      </div>
+      <div class="mock-widget-body" id="mockBody">
+        <div class="mock-boas-vindas">
+          <span class="mock-selo">Concierge do portfólio</span>
+          <strong>Olá! 👋</strong> Posso ajudar você a explorar as linhas e coleções do
+          catálogo — amenities, personalizados, acessórios e mais.
+          <div class="mock-chips" id="mockChips"></div>
+        </div>
+      </div>
+    </div>
+    <p class="preview-note">
+      Prévia estática — as respostas acima são pré-escritas só pra demonstração visual.
+      O produto real consulta uma base vetorial com os itens indexados e responde com o Gemini.
+    </p>
+  </div>
+</section>
+
+<section class="band band-light" id="stack">
+  <div class="container">
+    <div class="band-head">
+      <span class="eyebrow on-light">Sob o capô</span>
+      <h2>Stack</h2>
+    </div>
+
+    <table class="ledger">
+      <thead><tr><th>Etapa</th><th>Ferramenta</th><th>Detalhe</th></tr></thead>
+      <tbody>
+        <tr><td class="etapa">Coleta</td><td class="ferramenta">Python · requests</td><td class="detalhe">Regex sobre HTML server-rendered — sem navegador/Playwright.</td></tr>
+        <tr><td class="etapa">Embeddings</td><td class="ferramenta">Google Gemini</td><td class="detalhe">gemini-embedding-001, 768 dimensões, task_type retrieval.</td></tr>
+        <tr><td class="etapa">Índice vetorial</td><td class="ferramenta">Qdrant</td><td class="detalhe">Coleção única, upsert com skip por hash.</td></tr>
+        <tr><td class="etapa">Orquestração do chat</td><td class="ferramenta">N8N</td><td class="detalhe">Prompt, memória de sessão e log editáveis sem redeploy do backend.</td></tr>
+        <tr><td class="etapa">Backend</td><td class="ferramenta">FastAPI</td><td class="detalhe">Proxy fino pro N8N + admin do pipeline + estáticos.</td></tr>
+        <tr><td class="etapa">Interface</td><td class="ferramenta">JavaScript</td><td class="detalhe">Widget embutível em Shadow DOM, isolado do CSS do site hospedeiro.</td></tr>
+        <tr><td class="etapa">Testes</td><td class="ferramenta">Pytest</td><td class="detalhe">18 testes cobrindo extração e regras de negócio, sem depender de rede/API real.</td></tr>
+        <tr><td class="etapa">Infraestrutura</td><td class="ferramenta">Docker Compose</td><td class="detalhe">Qdrant + Redis + N8N + backend, um `docker compose up` só.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="foot-top">
+      <div>
+        <p class="foot-word">Concierge Harus</p>
+        <div class="foot-links">
+          <a class="foot-link" href="https://github.com/EduardoLopessz/harus-concierge" target="_blank" rel="noopener noreferrer">Repositório</a>
+          <a class="foot-link" href="https://github.com/EduardoLopessz" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+      </div>
+      <p class="foot-disclaimer">
+        Construído por Eduardo Elias Lopes como projeto independente de portfólio,
+        inspirado na estrutura pública do catálogo institucional da Harus — sem
+        vínculo oficial, patrocínio ou endosso da empresa. Código sob licença MIT.
+      </p>
+    </div>
+    <p>© 2026 Eduardo Elias Lopes.</p>
+  </div>
+</footer>
+
+<script src="assets/script.js"></script>
+</body>
+</html>

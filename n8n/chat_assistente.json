@@ -1,0 +1,221 @@
+{
+  "name": "Harus - Chat do Assistente",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "harus-chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-800, 0],
+      "id": "h1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Webhook Chat"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8000/rag/buscar",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Internal-Token",
+              "value": "={{ $env.INTERNAL_API_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { pergunta: $json.body.mensagem } }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-680, 0],
+      "id": "h1b2c3d4-0025-4000-8000-000000000025",
+      "name": "Buscar Contexto",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook Chat').item.json.body.mensagem }}",
+        "options": {
+          "systemMessage": "=Você é o Concierge de Produtos da Harus, indústria com 30 anos de mercado\nespecializada em soluções para hospitalidade: amenities (linha própria e\nmarcas licenciadas), produtos personalizados com a marca do hotel,\nacessórios/necessaires de quarto, saneantes profissionais e alimentação\nhoteleira (café da manhã, minibar, A&B).\n\n# SEU PAPEL\nAjudar compradores de hotéis, pousadas e redes hoteleiras a entender o\nportfólio da Harus — as linhas (Alma Brasil, House of Brands, Amenities\nHarus, Kids, Personalizados, Acessórios & Necessaires, Saneantes, Harus\nFood), as coleções dentro de cada linha e os itens que compõem cada uma —\npra encontrar a solução certa pro perfil do hotel, e conduzi-lo a solicitar\numa proposta comercial quando estiver pronto. Diferente de um SAC técnico,\nseu papel aqui é mais consultivo/pré-vendas: o catálogo da Harus é B2B e\nfunciona por orçamento (não há e-commerce, preço ou estoque público).\n\n# REGRAS DE CONTEÚDO\n1. Utilize APENAS as informações fornecidas na seção \"CONTEXTO RECUPERADO\n   PARA ESTA PERGUNTA\". Nunca invente linhas, coleções, itens, fragrâncias,\n   volumes ou características que não estejam explicitamente ali.\n2. Se nada no contexto for realmente relevante para a pergunta, diga isso\n   claramente e sugira reformular a busca ou falar direto com um consultor\n   pelo WhatsApp (https://wa.me/5516997222989) ou pelo formulário\n   https://harus.ind.br/site/contato/ — não force uma resposta com itens que\n   não combinam.\n3. Você NÃO tem acesso a preço, prazo de entrega, pedido mínimo exato ou\n   disponibilidade em tempo real — no catálogo da Harus isso é sempre \"sob\n   consulta\". Se perguntarem preço, condições comerciais, prazo ou como\n   fechar pedido, responda com o que souber sobre o produto/linha e\n   direcione para solicitar uma proposta: https://harus.ind.br/site/contato/\n   ou WhatsApp https://wa.me/5516997222989.\n4. Se o cliente relatar um problema com um pedido já feito, reclamação,\n   dúvida de faturamento, nota fiscal ou status de entrega de uma compra\n   existente, NÃO tente resolver — oriente a acessar o Portal do Cliente\n   (https://harus.portaldocliente.online/) ou o canal\n   https://harus.ind.br/site/contato/ pra tratar diretamente com a equipe.\n5. Quando o cliente demonstrar intenção clara de avançar (pedir orçamento,\n   amostra, \"quero contratar\", \"como eu compro\") convide-o a solicitar a\n   proposta pelo formulário https://harus.ind.br/site/contato/ ou WhatsApp\n   https://wa.me/5516997222989 — esse é o objetivo final de toda a conversa,\n   então nunca hesite em oferecer esse caminho quando fizer sentido.\n6. Quando houver mais de uma linha/coleção adequada, apresente as\n   alternativas e destaque a diferença prática entre elas (ex.: Alma Brasil\n   é a linha própria vegana/biodegradável da Harus; House of Brands são\n   marcas licenciadas de luxo como L'Occitane e Natura; Amenities Harus é\n   desenvolvimento exclusivo com identidade própria pra rede hoteleira;\n   Personalizados é o frasco com a marca do próprio hotel).\n7. Quando fizer sentido, explique brevemente o posicionamento da linha/\n   coleção (usando o campo \"Sobre a coleção\" do contexto) — pra que tipo de\n   hotel/experiência ela é indicada.\n8. Se a pergunta não tiver relação com os produtos ou a empresa (ex.:\n   saudação, pergunta pessoal, assunto aleatório), responda de forma breve e\n   cordial, sem forçar menção a produtos.\n9. LINKS — NUNCA escreva, monte ou adivinhe uma URL de produto: não existe\n   página individual por item no site da Harus, cada item pertence a uma\n   página de coleção (ex.: \".../alma-brasil/vegano/\"). Os itens relevantes já\n   aparecem automaticamente como cards clicáveis abaixo da sua resposta, com\n   o link correto da coleção vindo do catálogo — cite o item pelo nome, sem\n   colar URL no texto corrido.\n10. AO FINAL DE TODA RESPOSTA, numa linha própria, informe ao sistema (não ao\n    cliente) quais itens do contexto você de fato citou/recomendou nesta\n    resposta, no formato: `ITENS_SUGERIDOS: item_id1, item_id2` — use o\n    valor do campo \"Código interno\" exatamente como aparece no contexto. Se\n    você NÃO recomendou nenhum item específico — pergunta fora de escopo,\n    comercial genérica, suporte de pedido existente, saudação (regras 2, 3,\n    4, 8) — escreva `ITENS_SUGERIDOS: nenhum`. Essa linha é só um sinal\n    técnico pro sistema decidir quais cards mostrar (ver node \"Filtrar\n    Produtos Recomendados\"): não a explique, não a comente e não deixe de\n    escrevê-la em nenhuma resposta, mesmo as curtas.\n\n# TOM E ESTILO\n- Português do Brasil, consultivo e caloroso — como um concierge de vendas\n  experiente, não um SAC técnico frio.\n- Direto ao ponto, mas pode ser um pouco mais descritivo que um FAQ técnico\n  puro (o objetivo é encantar o comprador com o portfólio).\n- Use listas quando ajudar a organizar múltiplas linhas/coleções.\n- Não assine a mensagem nem use saudações genéricas tipo \"Prezado cliente\".\n\n# LIMITAÇÕES\n- Você não tem acesso a preço, estoque, prazo de entrega ou pedido mínimo em\n  tempo real — tudo é sob consulta (ver regra 3).\n- Você não resolve questões de pedidos/faturamento já existentes — direcione\n  pro Portal do Cliente ou canal comercial (ver regra 4).\n\n========================\nPÁGINA ATUAL DO VISITANTE\n========================\n{{ $('Webhook Chat').item.json.body.pagina_atual || 'não informado' }}\n\n========================\nCONTEXTO RECUPERADO PARA ESTA PERGUNTA\n========================\n\n{{ $json.contexto || 'Nenhuma informação relevante foi encontrada na base de conhecimento para esta pergunta.' }}\n",
+          "maxIterations": 3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [-440, 0],
+      "id": "h1b2c3d4-0020-4000-8000-000000000020",
+      "name": "Concierge Harus (AI Agent)",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.5,
+          "topP": 0.9,
+          "maxOutputTokens": 1500
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [-680, 220],
+      "id": "h1b2c3d4-0021-4000-8000-000000000021",
+      "name": "Chat Model (Gemini)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SUBSTITUIR_PELO_ID_DA_CREDENCIAL",
+          "name": "Google Gemini - Harus"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=sessao:{{ $('Webhook Chat').item.json.body.session_id || 'sem-sessao' }}",
+        "sessionTTL": 1800,
+        "contextWindowLength": 4
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.4,
+      "position": [-560, 220],
+      "id": "h1b2c3d4-0022-4000-8000-000000000022",
+      "name": "Memoria (Redis)",
+      "credentials": {
+        "redis": {
+          "id": "SUBSTITUIR_PELO_ID_DA_CREDENCIAL",
+          "name": "Harus Redis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Root cause do bug \"recomenda item em pergunta fora de escopo\": os cards\n// vinham direto da busca vetorial (node \"Buscar Contexto\"), sem nenhuma\n// relação com o que o Agent realmente respondeu.\n//\n// Por isso o Agent é obrigado (regra 10 do prompt) a fechar toda resposta com\n// uma linha \"ITENS_SUGERIDOS: id1, id2\" ou \"ITENS_SUGERIDOS: nenhum\". Esse\n// node lê essa linha, tira ela do texto visível ao cliente, e só deixa\n// passar pros cards os itens da busca cujo item_id o Agent realmente citou.\n\nfunction normalizarId(valor) {\n  return String(valor || '').trim().toLowerCase();\n}\n\nconst bruto = $json.output || '';\nconst match = bruto.match(/\\n?ITENS_SUGERIDOS:\\s*([^\\n]*)\\s*$/i);\n\nlet textoLimpo = bruto;\nlet idsSugeridos = [];\n\nif (match) {\n  textoLimpo = bruto.slice(0, match.index).trim();\n  const lista = match[1].trim();\n  if (lista && !/^nenhum$/i.test(lista)) {\n    idsSugeridos = lista.split(',').map((s) => normalizarId(s)).filter(Boolean);\n  }\n} else {\n  // Agent não seguiu a regra 10 (ex.: resposta de fallback/erro) — não temos\n  // sinal de que item foi de fato recomendado, então não mostra cards.\n  textoLimpo = bruto;\n}\n\nlet produtosDisponiveis = [];\ntry {\n  produtosDisponiveis = $('Buscar Contexto').item.json.produtos || [];\n} catch (erro) {\n  produtosDisponiveis = [];\n}\n\nconst produtosFiltrados = idsSugeridos.length\n  ? produtosDisponiveis.filter((p) => idsSugeridos.includes(normalizarId(p.codigo)))\n  : [];\n\nreturn [{\n  json: {\n    ...$json,\n    output: textoLimpo,\n    produtos_filtrados: produtosFiltrados,\n  },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-320, -20],
+      "id": "h1b2c3d4-0015-4000-8000-000000000015",
+      "name": "Filtrar Produtos Recomendados"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { resposta: $json.output || 'Estou com uma instabilidade temporária pra gerar a resposta agora. Pode tentar novamente em alguns instantes?', produtos: $json.produtos_filtrados || [] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-200, -100],
+      "id": "h1b2c3d4-0011-4000-8000-000000000011",
+      "name": "Responder Cliente"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst path = require('path');\n\n// Log tecnico local, sem PII, acesso restrito a equipe tecnica.\nconst entrada = $('Webhook Chat').item.json.body || {};\nconst resposta = $json.output || 'Estou com uma instabilidade temporária pra gerar a resposta agora. Pode tentar novamente em alguns instantes?';\n\n// Sinal deterministico de \"nao encontrei nada\": olha se a busca no catalogo\n// (node \"Buscar Contexto\") voltou vazia. Ajuda a priorizar coleções/FAQ que\n// faltam no catálogo ou perguntas fora do escopo do site.\nlet buscaSemResultado = false;\ntry {\n  const contextoBusca = $('Buscar Contexto').item.json.contexto || '';\n  buscaSemResultado = contextoBusca.includes('Nenhuma informação relevante foi encontrada');\n} catch (erro) {\n  // se o node de busca nem rodou (erro antes dele), nao da pra saber - deixa false\n}\n\nconst pastaLogs = $env.HARUS_LOGS_PATH || '/data/logs';\nconst caminho = path.join(pastaLogs, 'conversas.jsonl');\n\ntry {\n  fs.mkdirSync(pastaLogs, { recursive: true });\n  fs.appendFileSync(caminho, JSON.stringify({\n    timestamp: new Date().toISOString(),\n    usuario_id: entrada.usuario_id || 'anonimo',\n    pergunta: entrada.mensagem || '',\n    resposta,\n    itens_retornados: ($json.produtos_filtrados || []).length,\n    busca_sem_resultado: buscaSemResultado,\n    erro: !$json.output,\n  }) + '\\n', 'utf-8');\n} catch (erro) {\n  // log e best-effort, nunca deve derrubar o fluxo\n}\n\nreturn [{ json: $json }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-200, 140],
+      "id": "h1b2c3d4-0014-4000-8000-000000000014",
+      "name": "Registrar Log"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "harus-logout",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-800, 420],
+      "id": "h1b2c3d4-0030-4000-8000-000000000030",
+      "name": "Webhook Logout"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "=sessao:{{ $json.body.session_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-600, 420],
+      "id": "h1b2c3d4-0031-4000-8000-000000000031",
+      "name": "Limpar Historico (Logout)",
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "redis": {
+          "id": "SUBSTITUIR_PELO_ID_DA_CREDENCIAL",
+          "name": "Harus Redis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'ok' } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-400, 420],
+      "id": "h1b2c3d4-0032-4000-8000-000000000032",
+      "name": "Responder Logout"
+    }
+  ],
+  "connections": {
+    "Webhook Logout": {
+      "main": [[{ "node": "Limpar Historico (Logout)", "type": "main", "index": 0 }]]
+    },
+    "Limpar Historico (Logout)": {
+      "main": [[{ "node": "Responder Logout", "type": "main", "index": 0 }]]
+    },
+    "Webhook Chat": {
+      "main": [[{ "node": "Buscar Contexto", "type": "main", "index": 0 }]]
+    },
+    "Buscar Contexto": {
+      "main": [
+        [{ "node": "Concierge Harus (AI Agent)", "type": "main", "index": 0 }],
+        [
+          { "node": "Responder Cliente", "type": "main", "index": 0 },
+          { "node": "Registrar Log", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Chat Model (Gemini)": {
+      "ai_languageModel": [[{ "node": "Concierge Harus (AI Agent)", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Memoria (Redis)": {
+      "ai_memory": [[{ "node": "Concierge Harus (AI Agent)", "type": "ai_memory", "index": 0 }]]
+    },
+    "Concierge Harus (AI Agent)": {
+      "main": [
+        [{ "node": "Filtrar Produtos Recomendados", "type": "main", "index": 0 }],
+        [{ "node": "Filtrar Produtos Recomendados", "type": "main", "index": 0 }]
+      ]
+    },
+    "Filtrar Produtos Recomendados": {
+      "main": [
+        [
+          { "node": "Responder Cliente", "type": "main", "index": 0 },
+          { "node": "Registrar Log", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "harus-chat-assistente"
+  }
+}

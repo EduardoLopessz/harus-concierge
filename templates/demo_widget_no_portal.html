@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo — Widget embutido no site institucional da Harus</title>
+<style>
+    :root {
+        --gold: #B89A57;
+        --dark: #162330;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+        background: #F7F5F2;
+        color: #333;
+    }
+    header {
+        background: var(--dark);
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-bottom: 2px solid var(--gold);
+    }
+    header .logo { font-weight: 800; font-size: 20px; color: #fff; letter-spacing: 0.05em; }
+    header nav { display: flex; gap: 18px; font-size: 14px; color: var(--gold); margin-left: 24px; }
+    .banner {
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0 24px;
+    }
+    .aviso-demo {
+        background: #fff3e0;
+        border: 1px solid var(--gold);
+        color: #5c4a1f;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+    .produtos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+    }
+    .produto-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        text-align: center;
+    }
+    .produto-card .img-placeholder {
+        width: 100%;
+        height: 100px;
+        background: #f0efe9;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+    .produto-card h3 { font-size: 13px; color: var(--dark); margin: 0; }
+</style>
+</head>
+<body>
+
+<header>
+    <span class="logo">HARUS</span>
+    <nav>
+        <span>Início</span>
+        <span>Produtos</span>
+        <span>Nossa História</span>
+        <span>Fale Conosco</span>
+    </nav>
+</header>
+
+<div class="banner">
+    <div class="aviso-demo">
+        ⚠️ Esta é uma página de demonstração — simula como o widget do Concierge apareceria
+        embutido dentro do site institucional da Harus (harus.ind.br). Clique na bolha
+        no canto inferior direito.
+    </div>
+
+    <div class="produtos-grid">
+        <div class="produto-card"><div class="img-placeholder"></div><h3>Shampoo 30ml — Alma Brasil Vegano</h3></div>
+        <div class="produto-card"><div class="img-placeholder"></div><h3>Sabonete Líquido — Costa Brazil</h3></div>
+        <div class="produto-card"><div class="img-placeholder"></div><h3>Frasco Oval Cristal — Personalizados</h3></div>
+        <div class="produto-card"><div class="img-placeholder"></div><h3>Dispenser Argan 300ml</h3></div>
+    </div>
+</div>
+
+<script src="/static/widget.js"
+        data-api-base=""></script>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: harus-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  redis:
+    image: redis:alpine
+    container_name: harus-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # A rotina do chat (RAG + prompt + Gemini + histórico + log) roda no N8N —
+  # ver n8n/chat_assistente.json. Depois de subir, importe os dois workflows
+  # na UI (http://localhost:5678) e crie a credencial Redis apontando pra
+  # "redis:6379".
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: harus-n8n
+    restart: unless-stopped
+    depends_on:
+      - qdrant
+      - redis
+    ports:
+      - "5678:5678"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - QDRANT_URL=http://qdrant:6333
+      - HARUS_BACKEND_URL=http://backend:8000
+      - HARUS_ADMIN_TOKEN=${ADMIN_TOKEN}
+      - HARUS_LOGS_PATH=/data/logs
+      # usado pelo node "Buscar Contexto" (header X-Internal-Token no
+      # /rag/buscar) — precisa ser IGUAL ao INTERNAL_API_TOKEN do backend
+      - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN}
+      # necessário pra o node "Registrar Log" poder escrever em disco (fs)
+      - NODE_FUNCTION_ALLOW_BUILTIN=fs,path
+      # sem isso, Code nodes não conseguem ler $env.* — a partir de certas
+      # versões o n8n bloqueia isso por padrão
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      # rede corporativa faz inspeção de HTTPS (mesmo motivo do
+      # corporate-ca.crt no Dockerfile do backend)
+      - NODE_EXTRA_CA_CERTS=/certs/corporate-ca.crt
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./logs:/data/logs
+      - ./corporate-ca.crt:/certs/corporate-ca.crt:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5678/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    build: .
+    container_name: harus-backend
+    restart: unless-stopped
+    depends_on:
+      - qdrant
+      - n8n
+    ports:
+      - "8000:8000"
+    environment:
+      - QDRANT_URL=http://qdrant:6333
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:8000}
+      - N8N_CHAT_WEBHOOK_URL=http://n8n:5678/webhook/harus-chat
+      - N8N_LOGOUT_WEBHOOK_URL=http://n8n:5678/webhook/harus-logout
+    volumes:
+      - ./data/output:/app/data/output
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  qdrant_data:
+  redis_data:
+  n8n_data:

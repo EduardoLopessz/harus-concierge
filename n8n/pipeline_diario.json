@@ -1,0 +1,179 @@
+{
+  "name": "Harus - Pipeline Diario de Ingestao",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-1000, 0],
+      "id": "h2b2c3d4-0001-4000-8000-000000000001",
+      "name": "Agendamento Diario 02h"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.HARUS_BACKEND_URL }}/admin/executar-pipeline",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Admin-Token",
+              "value": "={{ $env.HARUS_ADMIN_TOKEN }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-760, 0],
+      "id": "h2b2c3d4-0002-4000-8000-000000000002",
+      "name": "Executar Pipeline (backend)",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "h2b2c3d4-cond-0001-0000-000000000001",
+              "leftValue": "={{ $json.total.novos + $json.total.atualizados }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-460, 0],
+      "id": "h2b2c3d4-0004-4000-8000-000000000004",
+      "name": "Houve mudanca?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "h2b2c3d4-0005-4000-8000-000000000005",
+              "name": "resumo",
+              "type": "string",
+              "value": "=Pipeline Harus rodou OK.\nProdutos: {{ $json.total.novos }} novos, {{ $json.total.atualizados }} atualizados, {{ $json.total.sem_alteracao }} sem alteracao. Reindexado: {{ $json.reindexado }}."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-220, -120],
+      "id": "h2b2c3d4-0006-4000-8000-000000000006",
+      "name": "Resumo (houve mudanca)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "h2b2c3d4-0007-4000-8000-000000000007",
+              "name": "resumo",
+              "type": "string",
+              "value": "=Pipeline Harus rodou OK. Nenhum item novo/atualizado hoje — nao foi preciso reindexar."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-220, 120],
+      "id": "h2b2c3d4-0008-4000-8000-000000000008",
+      "name": "Resumo (sem mudanca)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log simples do resultado — troque por um node de e-mail/Slack/Teams se\n// quiser alerta ativo. Deixado como Code node (sem credencial externa) pra\n// não travar a importação do workflow por falta de credencial configurada.\nconst motivo = $json.error\n  ? `Erro de conexao: ${$json.error}`\n  : ($json.message || 'falha desconhecida ao chamar o backend');\nconsole.log(`[Harus Pipeline] FALHA — ${new Date().toISOString()} — ${motivo}`);\nreturn [{ json: { alerta: true, motivo } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-460, 260],
+      "id": "h2b2c3d4-0010-4000-8000-000000000010",
+      "name": "Log de Falha"
+    }
+  ],
+  "connections": {
+    "Agendamento Diario 02h": {
+      "main": [
+        [
+          {
+            "node": "Executar Pipeline (backend)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar Pipeline (backend)": {
+      "main": [
+        [
+          {
+            "node": "Houve mudanca?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log de Falha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Houve mudanca?": {
+      "main": [
+        [
+          {
+            "node": "Resumo (houve mudanca)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resumo (sem mudanca)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "harus-pipeline-diario"
+  }
+}
