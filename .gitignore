@@ -20,6 +20,8 @@ scrape_log.txt
 # rodar atrás de um proxy com inspeção SSL semelhante deve gerar o próprio.
 corporate-ca.crt
 
-# Logo real da Harus (baixado do site oficial) — usado localmente pelo
-# /teste, mas fora do repo público por ser identidade visual de terceiro
-static/logo-harus.png
+# Logo real da Harus: liberado no repositório (privado) a partir de
+# 2026-08-13, por decisão explícita do autor — ver disclaimer em
+# docs/index.html (#sobre-o-protótipo) e nota no README. Volta a ser
+# ignorado automaticamente se este repo for tornado público de novo sem
+# essa confirmação valer mais — reavalie antes de publicar.

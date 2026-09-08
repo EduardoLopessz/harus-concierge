@@ -50,6 +50,7 @@ import urllib.parse
 
 import requests
 import truststore
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 truststore.inject_into_ssl()  # confia na lista de certificados do Windows (rede corporativa com inspeção SSL)
 
@@ -82,6 +83,11 @@ _sessao.headers.update({
 # HTTP
 # ==========================================
 
+# Uma falha transitória de rede (timeout, instabilidade momentânea do site,
+# rate-limit do Cloudflare) não deveria derrubar um crawl de 700+ itens — 3
+# tentativas com backoff exponencial (1s, 2s, 4s), mesmo padrão já usado nas
+# chamadas de embedding do rag_indexer.py/rag.py.
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
 def buscar_html(url: str) -> str:
     resposta = _sessao.get(url, timeout=20)
     resposta.raise_for_status()

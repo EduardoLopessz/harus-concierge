@@ -56,6 +56,22 @@ img, svg { display: block; max-width: 100%; }
 .eyebrow.on-dark { color: var(--gold-bright); }
 .eyebrow.on-light { color: #9a7e45; }
 
+/* ================= AVISO DE PROTÓTIPO (faixa fina, discreta) ================= */
+
+.proto-strip {
+    background: var(--graphite-deep);
+    color: rgba(247, 245, 242, 0.7);
+    font-size: 11.5px;
+    text-align: center;
+    padding: 7px 16px;
+    letter-spacing: 0.01em;
+}
+.proto-strip a {
+    color: var(--gold-bright);
+    text-decoration: underline;
+    margin-left: 4px;
+}
+
 /* ================= NAV ================= */
 
 .nav {
@@ -71,17 +87,16 @@ img, svg { display: block; max-width: 100%; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 62px;
+    gap: 24px;
+    height: 66px;
 }
 
-.nav-word {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 16.5px;
-    letter-spacing: 0.02em;
-    color: var(--cream);
+.nav-brand { display: flex; align-items: center; }
+.nav-logo {
+    height: 28px;
+    width: auto;
+    filter: brightness(0) invert(1);
 }
-.nav-word em { color: var(--gold-bright); font-style: normal; }
 
 .nav-links {
     display: flex;
@@ -201,18 +216,51 @@ img, svg { display: block; max-width: 100%; }
 }
 .btn-ghost:hover { border-color: var(--gold-bright); color: var(--gold-bright); }
 
-.hero-figure {
-    position: relative;
+.btn-sm { padding: 9px 16px; font-size: 13px; flex-shrink: 0; }
+
+.hero-copy { max-width: 620px; }
+
+.hero-stats {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    gap: 32px;
+    margin: 8px 0 32px;
+    padding: 20px 0;
+    border-top: 1px solid var(--line-on-dark);
+    border-bottom: 1px solid var(--line-on-dark);
 }
-.hero-figure svg {
-    width: 100%;
-    max-width: 300px;
+.hero-stats div { display: flex; flex-direction: column; gap: 2px; }
+.hero-stats strong {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 700;
     color: var(--gold-bright);
-    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.35));
+    line-height: 1;
 }
+.hero-stats span {
+    font-size: 11px;
+    color: rgba(247,245,242,0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* mosaico de fotos reais do catálogo, no hero */
+.hero-gallery {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.hero-gallery img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    border: 1px solid rgba(184,154,87,0.25);
+}
+.hero-gallery > *:nth-child(2) { transform: translateY(18px); }
+.hero-gallery > *:nth-child(5) { transform: translateY(18px); }
+.hero-gallery > *:nth-child(3) { transform: translateY(-10px); }
 
 /* ================= SECTIONS (shared) ================= */
 
@@ -235,6 +283,12 @@ section.band {
 }
 .band-dark .band-head h2 { color: var(--cream); }
 .band-light .band-head h2 { color: var(--graphite); }
+.band-lede {
+    margin: 14px 0 0;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: rgba(247,245,242,0.65);
+}
 
 /* ================= PIPELINE BELT ================= */
 
@@ -312,6 +366,13 @@ section.band {
     font-family: var(--mono);
     font-size: 11px;
     color: rgba(255,255,255,0.45);
+    flex: 1;
+}
+.preview-chrome .chrome-logo {
+    height: 14px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    opacity: 0.55;
 }
 
 .mock-widget-body {
@@ -489,11 +550,12 @@ section.band {
     background: rgba(255,255,255,0.04);
     border: 1px solid var(--line-on-dark);
     border-radius: 12px;
-    padding: 16px 18px;
+    padding: 0 18px 16px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     gap: 6px;
+    overflow: hidden;
     transition: border-color 0.15s ease, background 0.15s ease;
     font-family: var(--body);
 }
@@ -501,6 +563,20 @@ section.band {
     border-color: var(--gold);
     background: rgba(184,154,87,0.08);
 }
+.topico-capa {
+    margin: 0 -18px 14px;
+    height: 92px;
+    background: var(--graphite-deep);
+    overflow: hidden;
+}
+.topico-capa img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.82;
+    transition: transform 0.25s ease, opacity 0.15s ease;
+}
+.topico-card:hover .topico-capa img { transform: scale(1.06); opacity: 1; }
 .topico-linha {
     font-family: var(--display);
     font-weight: 700;
@@ -543,19 +619,31 @@ section.band {
 .ledger td.ferramenta { font-family: var(--mono); font-size: 12.5px; color: #9a7e45; width: 30%; }
 .ledger td.detalhe { color: var(--ink-muted); }
 
-/* ================= DISCLAIMER BANNER ================= */
+/* ================= BLOCO "SOBRE O PROTÓTIPO" ================= */
 
-.disclaimer-banner {
-    background: #fff3e0;
-    border-top: 1px solid var(--gold);
-    border-bottom: 1px solid var(--gold);
-    color: #5c4a1f;
-    font-size: 13px;
-    line-height: 1.6;
-    padding: 14px 0;
-    text-align: center;
+.disclaimer-block { max-width: 720px; }
+.disclaimer-block h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(24px, 3vw, 30px);
+    color: var(--cream);
+    margin: 14px 0 22px;
 }
-.disclaimer-banner strong { color: #3f3216; }
+.disclaimer-block p {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: rgba(247,245,242,0.7);
+    margin: 0 0 16px;
+}
+.disclaimer-block a { color: var(--gold-bright); text-decoration: underline; }
+.disclaimer-block code {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: rgba(184,154,87,0.12);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--gold-bright);
+}
 
 /* ================= FOOTER ================= */
 
@@ -567,47 +655,62 @@ footer.site-footer {
     line-height: 1.7;
 }
 footer.site-footer .foot-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
     gap: 24px;
-    flex-wrap: wrap;
     padding-bottom: 28px;
     margin-bottom: 24px;
     border-bottom: 1px solid rgba(184,154,87,0.2);
 }
-footer.site-footer .foot-word {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 17px;
-    color: var(--cream);
-    margin: 0 0 8px;
+.foot-logo {
+    height: 22px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
+    margin-bottom: 10px;
 }
-footer.site-footer a.foot-link {
+.foot-tagline { max-width: 32ch; color: rgba(247,245,242,0.5); font-size: 12.5px; }
+.foot-col h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--gold-bright);
-    text-decoration: none;
+    margin: 0 0 12px;
     font-weight: 600;
 }
-footer.site-footer a.foot-link:hover { text-decoration: underline; }
-footer.site-footer .foot-links { display: flex; gap: 22px; flex-wrap: wrap; }
-footer.site-footer .foot-disclaimer { max-width: 620px; }
+.foot-col { display: flex; flex-direction: column; }
+footer.site-footer a.foot-link {
+    color: rgba(247,245,242,0.75);
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+footer.site-footer a.foot-link:hover { color: var(--gold-bright); text-decoration: underline; }
+footer.site-footer .foot-disclaimer { max-width: 680px; font-size: 12px; color: rgba(247,245,242,0.45); }
 
 /* ================= RESPONSIVE ================= */
 
 @media (max-width: 900px) {
     .hero-inner { grid-template-columns: 1fr; }
-    .hero-figure { order: -1; max-width: 220px; margin: 0 auto 12px; }
+    .hero-gallery { order: -1; max-width: 420px; margin: 0 auto 8px; }
+    .hero-gallery > *:nth-child(n+7) { display: none; }
     .belt { grid-template-columns: 1fr 1fr; row-gap: 32px; }
     .belt::before { display: none; }
     .nav-links { display: none; }
+    footer.site-footer .foot-top { grid-template-columns: 1fr 1fr; }
+    .foot-brand { grid-column: 1 / -1; }
 }
 
 @media (max-width: 560px) {
     .belt { grid-template-columns: 1fr; }
-    .hero { padding: 64px 0 56px; }
+    .hero { padding: 56px 0 48px; }
     section.band { padding: 60px 0; }
     .ledger td, .ledger th { font-size: 12.5px; }
     .ledger td.etapa, .ledger td.ferramenta { width: auto; }
+    .hero-stats { gap: 20px; flex-wrap: wrap; }
+    .hero-gallery { grid-template-columns: repeat(3, 1fr); max-width: 320px; }
+    footer.site-footer .foot-top { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

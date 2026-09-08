@@ -2,10 +2,18 @@
 // Prévia do concierge — busca REAL sobre os 707 itens do catálogo
 // (docs/assets/data/catalog.json, gerado pelo scraper_produtos_harus.py).
 //
-// Isto NÃO chama Gemini/LLM nenhum — é busca por palavras-chave sobre dados
-// reais indexados, com fotos reais dos itens. A versão de produção (n8n +
-// Gemini + Qdrant, ver README) faz busca semântica de verdade; esta prévia
-// existe pra mostrar o resultado sem precisar de backend/API paga rodando.
+// Ranking híbrido, 100% client-side, sem LLM nenhum:
+//   1) TF-IDF + similaridade de cosseno sobre o "documento" de cada item
+//      (nome + linha + coleção + descrição da coleção + descrição editorial
+//      da linha) — termos raros (ex.: "castanha", "aromatherapy") pesam mais
+//      que termos genéricos ("shampoo", "sabonete", que aparecem em quase
+//      toda coleção) automaticamente, via IDF.
+//   2) Reforço estruturado: match exato/por-prefixo em campos específicos
+//      (linha, coleção, nome) soma pontos extras — o texto livre sozinho
+//      erra fácil em catálogos com nomes curtos e repetitivos.
+// A versão de produção (n8n + Gemini + Qdrant, ver README) troca isso por
+// embeddings semânticos de verdade; esta prévia existe pra mostrar um
+// resultado honesto sem precisar de backend/API paga rodando.
 // ==========================================================
 
 const corpo = document.getElementById("mockBody");
@@ -14,10 +22,12 @@ const formEl = document.getElementById("mockForm");
 const inputEl = document.getElementById("mockInput");
 const btnEnviarEl = document.getElementById("mockEnviar");
 const topicosEl = document.getElementById("mockTopicos");
+const heroGaleriaEl = document.getElementById("heroGallery");
 
 let CATALOGO = [];
 let TOPICOS = [];
 let LINHA_DESC = {}; // linha -> descrição editorial da página-hub (ver topicos.json)
+let INDICE_TFIDF = null; // { docs: [{item, vetor: Map}], idf: Map, normaConsulta(tokens) }
 let respondendo = false;
 let conversaIniciada = false;
 
@@ -70,7 +80,7 @@ function contemToken(textoCampo, token) {
   return palavras.some((p) => casam(p, token));
 }
 
-function pontuarItem(item, tokens, linhaDesc) {
+function pontuarEstrutura(item, tokens, linhaDesc) {
   const campos = {
     linha: normalizar(item.linha),
     categoria: normalizar(item.categoria),
@@ -95,13 +105,85 @@ function pontuarItem(item, tokens, linhaDesc) {
   return pontosFortes + (pontosFortes > 0 ? pontosDesc * 0.5 : 0);
 }
 
+// ---------- índice TF-IDF (construído uma vez, no carregamento) ----------
+
+function montarDocumento(item) {
+  // a descrição da LINHA fica de fora de propósito: ela é idêntica pra
+  // todo item da mesma linha (ex.: os ~90 itens de Harus Food têm o mesmo
+  // texto "café da manhã, minibar..."), então no TF-IDF ela só distorcia a
+  // norma do vetor sem diferenciar item nenhum — favorecia itens com nome
+  // curto por acidente. Fica só no reforço estrutural (pontuarEstrutura),
+  // que soma um bônus parelho pra linha inteira sem afetar a similaridade
+  // relativa entre os itens dela. O nome entra 2x pra pesar mais.
+  return [item.name, item.name, item.linha, item.categoria, item.desc].join(" ");
+}
+
+function construirIndiceTfIdf() {
+  const documentos = CATALOGO.map((item) => tokenizar(montarDocumento(item)));
+  const N = documentos.length;
+
+  const df = new Map(); // em quantos documentos cada termo aparece
+  documentos.forEach((tokens) => {
+    new Set(tokens).forEach((t) => df.set(t, (df.get(t) || 0) + 1));
+  });
+
+  const idf = new Map();
+  df.forEach((contagem, termo) => idf.set(termo, Math.log((N + 1) / (contagem + 1)) + 1));
+
+  const docs = CATALOGO.map((item, i) => {
+    const tokens = documentos[i];
+    const tf = new Map();
+    tokens.forEach((t) => tf.set(t, (tf.get(t) || 0) + 1));
+
+    const vetor = new Map();
+    tf.forEach((freq, termo) => vetor.set(termo, freq * (idf.get(termo) || 0)));
+
+    let normaSq = 0;
+    vetor.forEach((peso) => (normaSq += peso * peso));
+
+    return { item, vetor, norma: Math.sqrt(normaSq) || 1 };
+  });
+
+  return { docs, idf };
+}
+
+function vetorConsulta(tokens, idf) {
+  const tf = new Map();
+  tokens.forEach((t) => tf.set(t, (tf.get(t) || 0) + 1));
+  const vetor = new Map();
+  tf.forEach((freq, termo) => {
+    if (idf.has(termo)) vetor.set(termo, freq * idf.get(termo));
+  });
+  let normaSq = 0;
+  vetor.forEach((peso) => (normaSq += peso * peso));
+  return { vetor, norma: Math.sqrt(normaSq) || 1 };
+}
+
+function cosseno(vetorA, normaA, vetorB, normaB) {
+  // itera sobre o menor dos dois vetores — mais rápido, mesmo resultado
+  const [menor, maior] = vetorA.size < vetorB.size ? [vetorA, vetorB] : [vetorB, vetorA];
+  let produto = 0;
+  menor.forEach((peso, termo) => {
+    if (maior.has(termo)) produto += peso * maior.get(termo);
+  });
+  return produto / (normaA * normaB);
+}
+
 function buscar(pergunta, limite = 6) {
   const tokens = tokenizar(pergunta);
   if (tokens.length === 0) return [];
 
-  const pontuados = CATALOGO
-    .map((item) => ({ item, pontos: pontuarItem(item, tokens, LINHA_DESC[item.linha]) }))
-    .filter((r) => r.pontos > 0)
+  const consulta = vetorConsulta(tokens, INDICE_TFIDF.idf);
+
+  const pontuados = INDICE_TFIDF.docs
+    .map(({ item, vetor, norma }) => {
+      const simCosseno = cosseno(consulta.vetor, consulta.norma, vetor, norma);
+      const estrutura = pontuarEstrutura(item, tokens, LINHA_DESC[item.linha]);
+      // cosseno vai de 0 a ~1 — escalado pra ficar na mesma ordem de
+      // grandeza do reforço estrutural (que soma pontos inteiros por campo)
+      return { item, pontos: simCosseno * 14 + estrutura };
+    })
+    .filter((r) => r.pontos > 0.15)
     .sort((a, b) => b.pontos - a.pontos);
 
   // dedupe por categoria — não faz sentido mostrar 6 cards da mesma coleção
@@ -261,10 +343,14 @@ function renderizarTopicos() {
     card.type = "button";
     card.className = "topico-card";
     card.innerHTML = `
+      <div class="topico-capa"><img loading="lazy" alt=""></div>
       <span class="topico-linha"></span>
       <span class="topico-count"></span>
       <span class="topico-colecoes"></span>
     `;
+    const img = card.querySelector("img");
+    img.src = t.img || "";
+    img.onerror = () => (card.querySelector(".topico-capa").style.display = "none");
     card.querySelector(".topico-linha").textContent = t.linha;
     card.querySelector(".topico-count").textContent = `${t.count} itens`;
     card.querySelector(".topico-colecoes").textContent = t.categorias.slice(0, 4).join(" · ") + (t.categorias.length > 4 ? "…" : "");
@@ -277,22 +363,37 @@ function renderizarTopicos() {
   });
 }
 
+function renderizarHeroGaleria(fotos) {
+  if (!heroGaleriaEl) return;
+  heroGaleriaEl.innerHTML = "";
+  fotos.slice(0, 9).forEach((f) => {
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.alt = "";
+    img.src = `assets/hero/${f.file}`;
+    heroGaleriaEl.appendChild(img);
+  });
+}
+
 // ---------- inicialização ----------
 
 async function iniciar() {
   try {
-    const [catalogoResp, topicosResp] = await Promise.all([
+    const [catalogoResp, topicosResp, heroResp] = await Promise.all([
       fetch("assets/data/catalog.json"),
       fetch("assets/data/topicos.json"),
+      fetch("assets/hero/manifest.json"),
     ]);
     CATALOGO = await catalogoResp.json();
     TOPICOS = await topicosResp.json();
     LINHA_DESC = Object.fromEntries(TOPICOS.map((t) => [t.linha, t.desc || ""]));
+    renderizarHeroGaleria(await heroResp.json());
   } catch (erro) {
     corpo.innerHTML = '<p class="mock-erro">Não consegui carregar o catálogo indexado (assets/data/catalog.json). Rodando fora de um servidor local? Sirva a pasta docs/ com um servidor HTTP — abrir o arquivo direto (file://) bloqueia o fetch.</p>';
     return;
   }
 
+  INDICE_TFIDF = construirIndiceTfIdf();
   renderizarTopicos();
 
   SUGESTOES.forEach((s) => {

@@ -221,6 +221,31 @@ perguntas a uma sessão/CRM externo:
 
 ---
 
+# 🏢 Independência de infraestrutura (auditado em 2026-08-13)
+
+Nenhuma etapa do scraping, da indexação ou do assistente depende de
+infraestrutura interna de nenhum empregador, nem de uma instância de N8N
+compartilhada:
+
+- **N8N**: o `docker-compose.yml` sobe sua própria instância, a partir da
+  imagem pública oficial `docker.n8n.io/n8nio/n8n:latest` — não é a
+  instância privada de nenhuma empresa. O webhook do chat aponta pro
+  container local (`http://n8n:5678/webhook/harus-chat`), nunca pra um
+  domínio externo.
+- **Qdrant e Redis**: também sobem localmente via Docker, imagens públicas
+  oficiais.
+- **Único serviço externo real**: a API do Google Gemini, com uma
+  `GOOGLE_API_KEY` pessoal (gerada em [aistudio.google.com](https://aistudio.google.com/)) —
+  não é uma credencial corporativa.
+- **`corporate-ca.crt`**: opcional e não versionado (ver seção abaixo) —
+  só é necessário se QUEM RODAR o projeto estiver atrás de uma rede com
+  inspeção de HTTPS; não contém nada específico de nenhuma empresa, é só
+  um espaço reservado pro certificado raiz de quem precisar.
+- Auditoria feita com `grep` por termos de infraestrutura corporativa no
+  código deste repositório — nenhuma ocorrência.
+
+---
+
 # 🔒 Nota sobre o `corporate-ca.crt` (opcional, não versionado)
 
 Se você roda isso atrás de uma rede corporativa com inspeção de HTTPS (proxy

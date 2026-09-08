@@ -10,7 +10,8 @@
    "Necessaires e Frasqueiras",
    "Pumps"
   ],
-  "desc": "Tudo que completa a experiência do hóspede no quarto — de escovas e kits de costura a dispensers, chinelos e necessaires de alta qualidade."
+  "desc": "Tudo que completa a experiência do hóspede no quarto — de escovas e kits de costura a dispensers, chinelos e necessaires de alta qualidade.",
+  "img": "assets/photos/site-linha-harus-acessorios-acessorios-de-banheiro__absorvente.jpg"
  },
  {
   "linha": "Amenities Harus",
@@ -26,7 +27,8 @@
    "Vida Mandarina e Menta",
    "Vida Pitanga"
   ],
-  "desc": "Linhas desenvolvidas exclusivamente pela Harus para redes hoteleiras — com identidade própria, fragrâncias exclusivas e embalagens que refletem o posicionamento de cada marca."
+  "desc": "Linhas desenvolvidas exclusivamente pela Harus para redes hoteleiras — com identidade própria, fragrâncias exclusivas e embalagens que refletem o posicionamento de cada marca.",
+  "img": "assets/photos/site-linha-harus-amenities-harus-bpl__condicionador-25ml.jpg"
  },
  {
   "linha": "Alma Brasil",
@@ -48,7 +50,8 @@
    "Vegano",
    "Álcool Gel 70"
   ],
-  "desc": "Nossa linha premium própria é 100% biodegradável, cruelty free e formulada com ativos da biodiversidade brasileira. Cada coleção traduz uma faceta da riqueza natural do Brasil em fragrâncias e texturas únicas."
+  "desc": "Nossa linha premium própria é 100% biodegradável, cruelty free e formulada com ativos da biodiversidade brasileira. Cada coleção traduz uma faceta da riqueza natural do Brasil em fragrâncias e texturas únicas.",
+  "img": "assets/photos/site-linha-harus-alma-brasil-4-all-braille__4ab-condicionador.jpg"
  },
  {
   "linha": "Harus Food",
@@ -71,7 +74,8 @@
    "Président",
    "Vigor"
   ],
-  "desc": "Produtos alimentícios para café da manhã, minibar e serviços de A&B — desenvolvidos em parceria com as marcas mais reconhecidas do mercado alimentício brasileiro."
+  "desc": "Produtos alimentícios para café da manhã, minibar e serviços de A&B — desenvolvidos em parceria com as marcas mais reconhecidas do mercado alimentício brasileiro.",
+  "img": "assets/photos/site-linha-harus-harus-food-bauducco__bauducco-10.jpg"
  },
  {
   "linha": "House of Brands",
@@ -84,7 +88,8 @@
    "Shampoo 30ml",
    "Vinotage"
   ],
-  "desc": "As marcas mais desejadas da hotelaria mundial, disponíveis no portfólio Harus. Para hotéis que fazem da experiência do banho um momento de luxo."
+  "desc": "As marcas mais desejadas da hotelaria mundial, disponíveis no portfólio Harus. Para hotéis que fazem da experiência do banho um momento de luxo.",
+  "img": "assets/photos/site-house-of-brands-boticario__bot-con30.jpg"
  },
  {
   "linha": "Saneantes by Carla Guerra",
@@ -95,7 +100,8 @@
    "Linha Limpeza Geral",
    "Álcool Gel 70 Hoteleiro"
   ],
-  "desc": "Linha de saneantes profissionais desenvolvida em parceria com Carla Guerra, unindo eficácia comprovada a uma experiência olfativa agradável para equipes e hóspedes."
+  "desc": "Linha de saneantes profissionais desenvolvida em parceria com Carla Guerra, unindo eficácia comprovada a uma experiência olfativa agradável para equipes e hóspedes.",
+  "img": "assets/photos/site-linha-harus-saneantes-alcool-gel-70-hoteleiro__agh-1.jpg"
  },
  {
   "linha": "Amenities Kids",
@@ -106,7 +112,8 @@
    "Natura Kids",
    "Turma da Lílica"
   ],
-  "desc": "Linhas especialmente formuladas para o público infantil — com fórmulas suaves, embalagens divertidas e marcas que as famílias já conhecem e confiam."
+  "desc": "Linhas especialmente formuladas para o público infantil — com fórmulas suaves, embalagens divertidas e marcas que as famílias já conhecem e confiam.",
+  "img": "assets/photos/site-linha-harus-kids-baruel__colonia-10ml.jpg"
  },
  {
   "linha": "Personalizados",
@@ -114,6 +121,7 @@
   "categorias": [
    "Frascos e Embalagens Personalizáveis"
   ],
-  "desc": "Sua marca em cada detalhe da experiência do hóspede. Escolha o frasco, a fragrância e o layout — a Harus produz com sua identidade visual em escala industrial."
+  "desc": "Sua marca em cada detalhe da experiência do hóspede. Escolha o frasco, a fragrância e o layout — a Harus produz com sua identidade visual em escala industrial.",
+  "img": "assets/photos/personalizado-beatle-biodegradavel-25ml.jpg"
  }
 ]
