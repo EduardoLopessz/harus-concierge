@@ -2,7 +2,11 @@
 __pycache__/
 *.pyc
 .env
-data/
+# Ancorado na raiz de propósito (/data/, não data/) — sem a barra inicial
+# isso bateria em QUALQUER pasta chamada "data" no repo, inclusive
+# docs/assets/data/ (que guarda o manifesto real usado pela prévia e
+# PRECISA ser versionado). /data/ é só o cache bruto do scraper.
+/data/
 *.log
 scrape_log.txt
 .pytest_cache/

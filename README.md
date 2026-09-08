@@ -2,11 +2,19 @@
 
 > ⚠️ **Projeto independente de portfólio.** Não é um produto oficial da
 > Harus, e não tem vínculo, patrocínio ou endosso da empresa — é um estudo de
-> caso construído sobre a estrutura pública do catálogo institucional dela.
-> A página de apresentação (GitHub Pages) não usa fotos de produto nem a
-> identidade visual real da marca.
+> caso construído sobre o catálogo institucional público dela.
+>
+> **Repositório privado até confirmação de uso público.** A página de
+> apresentação (`docs/`) já usa nomes, descrições e fotos reais dos 707 itens
+> indexados (com autorização do autor pra uso interno/privado) — por isso o
+> GitHub Pages está desligado por ora (Pages exige repo público) e o
+> repositório não deve ser tornado público nem ter o link compartilhado
+> externamente sem confirmação explícita.
 
-🔗 **Página de apresentação:** https://EduardoLopessz.github.io/harus-concierge/
+🔗 **Página de apresentação (local):** abra `docs/index.html` via um servidor
+HTTP local (ex.: `python -m http.server` dentro de `docs/`) — depende de
+`fetch` pra carregar `assets/data/catalog.json`, não funciona abrindo o
+arquivo direto no navegador (`file://`).
 
 ## 📌 Sobre o projeto
 
@@ -226,15 +234,31 @@ se o arquivo não existir). Na maioria das redes isso não é necessário.
 
 ---
 
-# 🌐 Página de apresentação (GitHub Pages)
+# 🌐 Página de apresentação (`docs/`)
 
-`docs/` é uma página estática independente do backend — mostra a arquitetura,
-o pipeline e uma prévia visual do widget com respostas pré-escritas (sem
-depender de Gemini/Qdrant/N8N rodando). **Não usa fotos de produto nem
-identidade visual real da Harus** — só ilustrações originais (line-art de
-embalagens genéricas) e a paleta de cores. Publicada em
-https://EduardoLopessz.github.io/harus-concierge/ via GitHub Pages
-(branch `main`, pasta `/docs`).
+Página estática independente do backend — mostra a arquitetura, o pipeline e
+uma **prévia funcional de busca** sobre os 707 itens reais do catálogo:
+
+- `docs/assets/data/catalog.json` — manifesto dos 707 itens (nome, linha,
+  coleção, descrição, foto), gerado a partir de `data/output/` depois de
+  rodar o scraper (ver script de geração no histórico do projeto — não versionado
+  separadamente, é um one-off; regenerar com o mesmo padrão se o catálogo mudar).
+- `docs/assets/data/topicos.json` — agregação por linha (contagem de itens,
+  coleções, descrição editorial da página-hub) usada na lista "Do que ela
+  sabe falar" e pra enriquecer a busca (a descrição de cada linha nunca
+  aparece em nenhum item individual, já que só existe na página-hub, sem
+  `window.CATALOG` — sem isso, perguntas tipo "o que tem pra café da manhã"
+  não batiam em nada).
+- `docs/assets/photos/` — miniaturas reais (140×140) de ~700 itens.
+- `docs/assets/script.js` — busca 100% client-side por palavras-chave
+  (normalização + casamento por prefixo pra lidar com plural/singular,
+  sem stemmer de verdade), **sem LLM nenhum** — é resultado determinístico
+  sobre dados reais, não geração de texto. O produto final usa embeddings +
+  Gemini de verdade (ver pipeline na própria página).
+
+**Por que privado:** usa fotos e nomes reais do catálogo da Harus — o autor
+tem que confirmar que está tudo certo antes de tornar isso público (GitHub
+Pages exige repo público). Ver aviso no topo deste README.
 
 ---
 

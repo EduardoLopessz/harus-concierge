@@ -1,0 +1,119 @@
+[
+ {
+  "linha": "Acessórios & Necessaires",
+  "count": 198,
+  "categorias": [
+   "Acessórios de Banheiro",
+   "Chinelos",
+   "Dispensers",
+   "Frascos e Tampas",
+   "Necessaires e Frasqueiras",
+   "Pumps"
+  ],
+  "desc": "Tudo que completa a experiência do hóspede no quarto — de escovas e kits de costura a dispensers, chinelos e necessaires de alta qualidade."
+ },
+ {
+  "linha": "Amenities Harus",
+  "count": 152,
+  "categorias": [
+   "BPL",
+   "Carla Guerra",
+   "Kantharus Erva-Doce",
+   "Momento Bem-Estar",
+   "Regina Segui",
+   "Vida Erva-Doce",
+   "Vida Floral Plus",
+   "Vida Mandarina e Menta",
+   "Vida Pitanga"
+  ],
+  "desc": "Linhas desenvolvidas exclusivamente pela Harus para redes hoteleiras — com identidade própria, fragrâncias exclusivas e embalagens que refletem o posicionamento de cada marca."
+ },
+ {
+  "linha": "Alma Brasil",
+  "count": 114,
+  "categorias": [
+   "4 All Braille",
+   "Argan",
+   "Aromatherapy",
+   "Attic",
+   "Castanha do Pará",
+   "Chocolate com Pimenta",
+   "Demaquilante e Água Micelar",
+   "Dermaharus",
+   "Frutos da Amazônia",
+   "Lavanda & Jasmim",
+   "Luxury",
+   "Morango Gourmet com Champagne",
+   "Spa",
+   "Vegano",
+   "Álcool Gel 70"
+  ],
+  "desc": "Nossa linha premium própria é 100% biodegradável, cruelty free e formulada com ativos da biodiversidade brasileira. Cada coleção traduz uma faceta da riqueza natural do Brasil em fragrâncias e texturas únicas."
+ },
+ {
+  "linha": "Harus Food",
+  "count": 90,
+  "categorias": [
+   "Bauducco",
+   "Billa",
+   "Caravelas",
+   "Cepêra",
+   "Heinz",
+   "Hemmer",
+   "Homemade",
+   "Isis Mel",
+   "Itambé",
+   "Júnior Alimentos",
+   "Le Petit",
+   "Lowçucar",
+   "Polenguinho",
+   "Poletto",
+   "Président",
+   "Vigor"
+  ],
+  "desc": "Produtos alimentícios para café da manhã, minibar e serviços de A&B — desenvolvidos em parceria com as marcas mais reconhecidas do mercado alimentício brasileiro."
+ },
+ {
+  "linha": "House of Brands",
+  "count": 71,
+  "categorias": [
+   "Costa Brazil",
+   "Jacques Janine",
+   "Natura",
+   "O Boticário",
+   "Shampoo 30ml",
+   "Vinotage"
+  ],
+  "desc": "As marcas mais desejadas da hotelaria mundial, disponíveis no portfólio Harus. Para hotéis que fazem da experiência do banho um momento de luxo."
+ },
+ {
+  "linha": "Saneantes by Carla Guerra",
+  "count": 36,
+  "categorias": [
+   "Aromatizadores de Ambiente",
+   "Linha Cozinha",
+   "Linha Limpeza Geral",
+   "Álcool Gel 70 Hoteleiro"
+  ],
+  "desc": "Linha de saneantes profissionais desenvolvida em parceria com Carla Guerra, unindo eficácia comprovada a uma experiência olfativa agradável para equipes e hóspedes."
+ },
+ {
+  "linha": "Amenities Kids",
+  "count": 31,
+  "categorias": [
+   "Baruel",
+   "Kids Kit",
+   "Natura Kids",
+   "Turma da Lílica"
+  ],
+  "desc": "Linhas especialmente formuladas para o público infantil — com fórmulas suaves, embalagens divertidas e marcas que as famílias já conhecem e confiam."
+ },
+ {
+  "linha": "Personalizados",
+  "count": 15,
+  "categorias": [
+   "Frascos e Embalagens Personalizáveis"
+  ],
+  "desc": "Sua marca em cada detalhe da experiência do hóspede. Escolha o frasco, a fragrância e o layout — a Harus produz com sua identidade visual em escala industrial."
+ }
+]

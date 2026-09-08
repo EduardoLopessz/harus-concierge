@@ -111,8 +111,11 @@
 <section class="disclaimer-banner">
   <div class="container">
     ⚠️ <strong>Este site não é operado pela Harus</strong> — é um projeto autoral de
-    Eduardo Elias Lopes, construído sobre a estrutura pública do catálogo institucional
-    da empresa, sem uso de fotos de produto ou identidade visual da marca.
+    Eduardo Elias Lopes, construído sobre o catálogo institucional público da
+    empresa. Usa nomes, descrições e fotos reais dos 707 itens indexados
+    (raspados do site oficial) só pra demonstrar o resultado do pipeline —
+    <strong>repositório privado até confirmação de uso</strong>, não publicado
+    publicamente.
   </div>
 </section>
 
@@ -167,7 +170,7 @@
 <section class="band band-dark" id="previa">
   <div class="container">
     <div class="band-head">
-      <span class="eyebrow on-dark">Prévia visual · respostas simuladas</span>
+      <span class="eyebrow on-dark">Prévia funcional · busca real, sem LLM</span>
       <h2>Fale com o concierge</h2>
     </div>
 
@@ -179,16 +182,29 @@
       <div class="mock-widget-body" id="mockBody">
         <div class="mock-boas-vindas">
           <span class="mock-selo">Concierge do portfólio</span>
-          <strong>Olá! 👋</strong> Posso ajudar você a explorar as linhas e coleções do
-          catálogo — amenities, personalizados, acessórios e mais.
+          <strong>Olá! 👋</strong> Digite sua pergunta — busco de verdade nos 707 itens
+          indexados do catálogo real. Ou clique num tópico abaixo pra começar.
           <div class="mock-chips" id="mockChips"></div>
         </div>
       </div>
+      <form class="mock-form" id="mockForm">
+        <input class="mock-input" id="mockInput" type="text" placeholder="Pergunte o que quiser sobre o catálogo..." autocomplete="off">
+        <button class="mock-btn-enviar" id="mockEnviar" type="submit" aria-label="Enviar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </form>
     </div>
     <p class="preview-note">
-      Prévia estática — as respostas acima são pré-escritas só pra demonstração visual.
-      O produto real consulta uma base vetorial com os itens indexados e responde com o Gemini.
+      Busca real por palavras-chave sobre os itens indexados (nomes, fotos e descrições
+      de coleção reais do catálogo) — ainda sem IA generativa. O produto final (ver
+      pipeline acima) troca essa busca por embeddings + Gemini, com raciocínio de verdade.
     </p>
+
+    <div class="band-head" style="margin-top:64px">
+      <span class="eyebrow on-dark">Do que ela sabe falar</span>
+      <h2>Tópicos indexados</h2>
+    </div>
+    <div class="topicos-grid" id="mockTopicos"></div>
   </div>
 </section>
 
